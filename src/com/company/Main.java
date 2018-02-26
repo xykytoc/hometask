@@ -1,76 +1,57 @@
 package com.company;
 
-//import java.lang.reflect.Array;
+import java.util.Iterator;
+import java.lang.reflect.Method;
+import java.lang.Thread.State;
+import java.util.concurrent.TimeUnit;
 
-public class Main extends ArrayVector
+public class Main
 {
 
-    public static void main(String[] args)
-    {
-        ArrayVector array1 = new ArrayVector(); //создание вектора
-        array1.append(8.3);
-        array1.append(5.1);
-        array1.append(3.5);
-        array1.append(4.0); //заполнение вектора различными значениями
-        array1.append(3.2);
-        array1.append(9.4);
-        array1.append(1.6);
-        array1.append(4.2);
-        array1.append(11.11);
+    public static void main(String[] args) {
 
-        System.out.println("Вектор ");
-        for (int i = 0; i < array1.getSize(); i++) //вывод каждого элемента вектора
-        {
-            System.out.println(array1.getElement(i));
+            try {
+                // 1st Task
+                System.out.println(" ");
+                System.out.println("****** 1st Task ******");
+                ArrayVector vx = new ArrayVector(25);
+                WriterThread writer = new WriterThread(vx);
+                ReaderThread reader = new ReaderThread(vx);
+                writer.start();
+                reader.start();
+                while ((reader.getState() != State.TERMINATED)
+                        && (writer.getState() != State.TERMINATED)) {
+                    TimeUnit.MILLISECONDS.sleep(100);
+                }
+
+                // 2nd task
+                System.out.println(" ");
+                System.out.println("****** 2nd Task ******");
+                vx = new ArrayVector(25);
+                VectorSynchronizer vxSync = new VectorSynchronizer(vx);
+
+                new Thread(new RunnableReader(vxSync)).start();
+                new Thread(new RunnableWriter(vxSync)).start();
+
+                while (vxSync.canRead() || vxSync.canWrite()) {
+                    TimeUnit.MILLISECONDS.sleep(100);
+                }
+
+                // 3rd Task
+                System.out.println(" ");
+                System.out.println("****** 3rd Task ******");
+                Thread printer = new Thread(new SafePrinter());
+                Thread printer1 = new Thread(new SafePrinter());
+                Thread printer2 = new Thread(new SafePrinter());
+
+                Vectors.useOutLock = true;
+
+                printer.start();
+                printer1.start();
+                printer2.start();
+
+            } catch (Exception ex) {
+                System.out.println("ERROR");
+            }
         }
-
-        System.out.println(" ");
-        System.out.println("Длина: ");
-        System.out.println(array1.getSize());    //вызов метода getSize из класса ArrayVector
-        System.out.println(" ");
-        array1.getElement(2); //вызов метода getElement из класса ArrayVector по индексу
-        System.out.println(" ");
-        System.out.println("Максимальное значение: "); //вывод строки
-        System.out.println(array1.getMax()); //вывод результата метода getMax
-        System.out.println("Минимальное значение: "); //вывод строки
-        System.out.println(array1.getMin()); //вывод результата метода getMin
-        System.out.println("Среднее значение:"); //вывод строки
-        System.out.println(array1.getAverage()); //вывод результата метода getAverage
-        System.out.println(" ");
-        //System.out.println(ArrayVector.mult());
-        array1.getNorm(); //вызов метода getNorm (с выводом результата)
-        System.out.println(" ");
-        array1.sort();
-
-
-        System.out.println(" ");
-
-        System.out.println("***Сортировка***");
-        for (int i = 0; i < array1.getSize(); i++) //вывод каждого элемента отсортированного вектора
-        {
-            System.out.println(array1.getElement(i));
-        }
-
-        System.out.println(" ");
-        System.out.println(" ");
-
-        ArrayVector rew = ArrayVector.mult(array1, 25);
-        System.out.println("Умножение на 25: ");
-        for (int i = 0; i < rew.getSize(); i++) //вывод каждого умноженного элемента вектора
-        {
-            System.out.println(rew.getElement(i));
-        }
-        System.out.println(" ");
-
-        ArrayVector som = ArrayVector.sum(array1, rew); //создание вектора путем сложения двух
-        System.out.println("Сложение векторов:");
-        for (int i = 0; i < som.getSize(); i++)
-        {
-            System.out.println(som.getElement(i));
-        }
-
-        System.out.println(" ");
-        System.out.println("Скалярное произведение векторов:");
-        System.out.println(ArrayVector.scalarMult(array1,rew));
-    }
 }
